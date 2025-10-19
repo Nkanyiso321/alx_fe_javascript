@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Quote Generator</title>
+    <!-- Load Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for better look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the quote text itself */
+        .quote-text {
+            border-left: 4px solid #3b82f6; /* Blue border for emphasis */
+            padding-left: 1rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 sm:p-8 flex items-center justify-center">
+
+    <div id="app" class="w-full max-w-2xl bg-white shadow-2xl rounded-xl p-6 sm:p-10">
+
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-8 text-center">Dynamic Quote Generator</h1>
+
+        <!-- Quote Display Area -->
+        <div id="quoteDisplay" class="mb-8 min-h-24 flex items-center justify-center">
+            <!-- Content will be injected here -->
+        </div>
+
+        <!-- Main Controls -->
+        <div id="controls" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+                <!-- Button to trigger new quote -->
+                <button id="newQuoteButton" class="w-full sm:w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                    Show New Quote
+                </button>
+                <!-- Button to show the dynamic form -->
+                <button id="showAddFormButton" class="w-full sm:w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                    Add Your Own Quote
+                </button>
+            </div>
+
+            <!-- Dynamic Form Injection Area -->
+            <div id="addQuoteFormContainer" class="p-4 border border-gray-200 rounded-lg hidden">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Add a New Quote</h2>
+                <!-- Form elements will be built here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Status Message Box (for dynamic alerts/feedback) -->
+        <div id="statusMessage" class="mt-6 p-3 rounded-lg text-sm text-center transition-opacity duration-300 opacity-0"></div>
+
+    </div>
+
+    <script>
+        // Initial array of quote objects
+        let quotes = [
+            { text: "The only way to do great work is to love what you do.", category: "Inspiration" },
+            { text: "Strive not to be a success, but rather to be of value.", category: "Success" },
+            { text: "Life is what happens when you're busy making other plans.", category: "Life" },
+            { text: "The future belongs to those who believe in the beauty of their dreams.", category: "Inspiration" }
+        ];
+
+        // --- DOM Element References ---
+        const quoteDisplay = document.getElementById('quoteDisplay');
+        const newQuoteButton = document.getElementById('newQuoteButton');
+        const showAddFormButton = document.getElementById('showAddFormButton');
+        const formContainer = document.getElementById('addQuoteFormContainer');
+        const statusMessage = document.getElementById('statusMessage');
+
+        /**
+         * Clears the current quote display and inserts a randomly selected quote.
+         * This function demonstrates dynamic content generation and styling.
+         */
+        function showRandomQuote() {
+            // 1. Clear previous content
+            quoteDisplay.innerHTML = '';
+
+            if (quotes.length === 0) {
+                quoteDisplay.textContent = "No quotes available. Add one!";
+                quoteDisplay.className = "text-center text-red-500 font-medium";
+                return;
+            }
+
+            // 2. Select a random quote
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            const quote = quotes[randomIndex];
+
+            // 3. Create and configure new DOM elements
+            
+            // Outer wrapper for styling
+            const quoteCard = document.createElement('div');
+            quoteCard.className = 'p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-inner animate-in fade-in zoom-in duration-500';
+
+            // Quote text element (p tag)
+            const quoteTextElement = document.createElement('p');
+            quoteTextElement.className = 'quote-text text-xl italic text-gray-800 mb-4';
+            quoteTextElement.textContent = `“${quote.text}”`;
+
+            // Category tag element (span tag)
+            const categoryElement = document.createElement('span');
+            categoryElement.className = 'inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm';
+            categoryElement.textContent = quote.category;
+
+            // 4. Assemble and insert into the DOM
+            quoteCard.appendChild(quoteTextElement);
+            quoteCard.appendChild(categoryElement);
+            quoteDisplay.appendChild(quoteCard);
+        }
+
+        /**
+         * Dynamically creates the form for adding new quotes and inserts it into the DOM.
+         * This demonstrates creating complex structures entirely in JavaScript.
+         */
+        function createAddQuoteForm() {
+            // Prevent recreating the form if it already exists
+            if (formContainer.children.length > 1) return;
+
+            // 1. Create Input for Quote Text
+            const textInput = document.createElement('input');
+            textInput.id = 'newQuoteText';
+            textInput.type = 'text';
+            textInput.placeholder = 'Enter the full quote here...';
+            textInput.className = 'w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 mb-3';
+
+            // 2. Create Input for Category
+            const categoryInput = document.createElement('input');
+            categoryInput.id = 'newQuoteCategory';
+            categoryInput.type = 'text';
+            categoryInput.placeholder = 'Enter category (e.g., Life, Work, Love)';
+            categoryInput.className = 'w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 mb-4';
+
+            // 3. Create Add Button
+            const addButton = document.createElement('button');
+            addButton.id = 'addQuoteButton';
+            addButton.textContent = 'Submit Quote';
+            addButton.className = 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md hover:shadow-lg';
+            
+            // Attach the event listener directly to the dynamically created button
+            addButton.addEventListener('click', addQuote);
+
+            // 4. Append elements to the container
+            formContainer.appendChild(textInput);
+            formContainer.appendChild(categoryInput);
+            formContainer.appendChild(addButton);
+        }
+
+        /**
+         * Handles the logic for adding a new quote to the array and updating the UI.
+         */
+        function addQuote() {
+            const textInput = document.getElementById('newQuoteText');
+            const categoryInput = document.getElementById('newQuoteCategory');
+
+            const newText = textInput.value.trim();
+            let newCategory = categoryInput.value.trim();
+
+            if (newText === "") {
+                showMessage("Quote text cannot be empty!", "bg-red-100 text-red-700");
+                return;
+            }
+
+            // Default category if none is provided
+            if (newCategory === "") {
+                newCategory = "General";
+            }
+
+            // Add the new quote object to the array
+            quotes.push({
+                text: newText,
+                category: newCategory
+            });
+
+            // Clear the form inputs and hide the form
+            textInput.value = '';
+            categoryInput.value = '';
+            formContainer.classList.add('hidden');
+            showAddFormButton.textContent = 'Add Your Own Quote';
+
+            // Provide feedback to the user
+            showMessage("Quote added successfully! Try showing a new one.", "bg-green-100 text-green-700");
+            
+            // Optionally show the new quote immediately
+            showRandomQuote();
+        }
+
+        /**
+         * Displays a temporary status message to the user.
+         */
+        function showMessage(message, className) {
+            statusMessage.textContent = message;
+            statusMessage.className = `mt-6 p-3 rounded-lg text-sm text-center transition-opacity duration-300 opacity-100 ${className}`;
+
+            // Hide the message after 3 seconds
+            setTimeout(() => {
+                statusMessage.classList.remove('opacity-100');
+                statusMessage.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        /**
+         * Sets up all the necessary event listeners for user interaction.
+         */
+        function setupEventListeners() {
+            // 1. New Quote Button
+            newQuoteButton.addEventListener('click', showRandomQuote);
+
+            // 2. Toggle Add Quote Form Button
+            showAddFormButton.addEventListener('click', () => {
+                const isHidden = formContainer.classList.toggle('hidden');
+                showAddFormButton.textContent = isHidden ? 'Add Your Own Quote' : 'Hide Form';
+            });
+        }
+
+        /**
+         * Initialization function called on page load.
+         */
+        function init() {
+            createAddQuoteForm(); // Build the form structure on load (it's initially hidden)
+            setupEventListeners(); // Attach event handlers
+            showRandomQuote(); // Display the first quote
+        }
+
+        window.onload = init;
+
+    </script>
+</body>
+</html>
