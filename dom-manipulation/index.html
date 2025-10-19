@@ -3,9 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <title>Dynamic Quote Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    input {
+      padding: 5px;
+      margin: 5px 0;
+    }
+    button {
+      padding: 5px 10px;
+      margin-left: 5px;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+    #notification {
+      display: none;
+      background: #fffae6;
+      border: 1px solid #f7e1a0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
+
+  <!-- Notification -->
+  <div id="notification"></div>
 
   <!-- Category Filter -->
   <label for="categoryFilter">Filter by Category:</label>
@@ -23,7 +56,7 @@
   <h2>Quotes</h2>
   <ul id="quoteList"></ul>
 
-  <!-- Link to JS -->
+  <!-- Link to JavaScript -->
   <script src="script.js"></script>
 </body>
 </html>

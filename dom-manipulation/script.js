@@ -1,3 +1,7 @@
+// ---------------------------
+// Initialization
+// ---------------------------
+
 // Initialize quotes from localStorage or default
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [
     { text: "The journey of a thousand miles begins with one step.", category: "Motivation" },
@@ -8,7 +12,10 @@ let quotes = JSON.parse(localStorage.getItem('quotes')) || [
 // Remember last selected category
 let lastCategory = localStorage.getItem('selectedCategory') || 'all';
 
-// Populate categories dropdown
+// ---------------------------
+// Category Dropdown
+// ---------------------------
+
 function populateCategories() {
     const categoryFilter = document.getElementById('categoryFilter');
 
@@ -29,7 +36,10 @@ function populateCategories() {
     categoryFilter.value = lastCategory;
 }
 
-// Display quotes in the list
+// ---------------------------
+// Display Quotes
+// ---------------------------
+
 function displayQuotes(filteredQuotes) {
     const quoteList = document.getElementById('quoteList');
     quoteList.innerHTML = '';
@@ -41,7 +51,10 @@ function displayQuotes(filteredQuotes) {
     });
 }
 
-// Add a new quote
+// ---------------------------
+// Add Quote
+// ---------------------------
+
 function addQuote() {
     const text = document.getElementById('quoteText').value.trim();
     const category = document.getElementById('quoteCategory').value.trim();
@@ -64,7 +77,10 @@ function addQuote() {
     document.getElementById('quoteCategory').value = '';
 }
 
-// Filter quotes by selected category (renamed to match grader)
+// ---------------------------
+// Filter Quotes
+// ---------------------------
+
 function filterQuote() {
     const selectedCategory = document.getElementById('categoryFilter').value;
 
@@ -79,8 +95,73 @@ function filterQuote() {
     displayQuotes(filteredQuotes);
 }
 
-// Initialize page
+// ---------------------------
+// Notification System
+// ---------------------------
+
+function showNotification(message) {
+    const notif = document.getElementById("notification");
+    notif.textContent = message;
+    notif.style.display = "block";
+
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 5000); // hide after 5 seconds
+}
+
+// ---------------------------
+// Server Simulation & Sync
+// ---------------------------
+
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Mock API
+
+async function fetchServerQuotes() {
+    try {
+        const response = await fetch(SERVER_URL);
+        const data = await response.json();
+
+        // Transform server data into quotes format
+        const serverQuotes = data.slice(0, 5).map(item => ({
+            text: item.title,
+            category: "Server"
+        }));
+
+        return serverQuotes;
+    } catch (error) {
+        console.error("Failed to fetch server quotes:", error);
+        return [];
+    }
+}
+
+async function syncWithServer() {
+    const serverQuotes = await fetchServerQuotes();
+    let updated = false;
+
+    serverQuotes.forEach(sq => {
+        const exists = quotes.some(lq => lq.text === sq.text);
+        if (!exists) {
+            quotes.push(sq);
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        localStorage.setItem('quotes', JSON.stringify(quotes));
+        populateCategories();
+        filterQuote();
+        showNotification("Quotes updated from server!");
+    }
+}
+
+// ---------------------------
+// Initialize Page & Periodic Sync
+// ---------------------------
+
 window.onload = () => {
     populateCategories();
     filterQuote();
+    syncWithServer(); // Initial sync
+
+    // Sync every 30 seconds
+    setInterval(syncWithServer, 30000);
 };
