@@ -1,176 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #f9f9f9;
-      color: #333;
-      padding: 30px;
+      margin: 40px;
+      background-color: #f7f7f7;
     }
-
     h1 {
-      margin-bottom: 20px;
+      color: #333;
     }
-
     #quoteDisplay {
-      font-size: 1.3rem;
-      font-style: italic;
-      background: #fff;
+      margin: 20px auto;
       padding: 15px;
-      margin: 15px auto;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      width: 80%;
-      max-width: 600px;
+      background-color: #fff;
+      width: 60%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      min-height: 80px;
     }
-
-    input {
-      margin: 5px;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+    .category {
+      color: #666;
+      font-style: italic;
     }
-
     button {
-      padding: 8px 15px;
-      margin: 5px;
-      background-color: #007bff;
-      color: white;
+      margin: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
+      background-color: #007bff;
+      color: white;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
-    .controls {
-      margin-top: 20px;
+    input {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-
-  <div id="quoteDisplay">Click “Show New Quote” to begin!</div>
+  
+  <div id="quoteDisplay"></div>
+  
   <button id="newQuote">Show New Quote</button>
 
-  <div class="controls">
-    <h3>Add a New Quote</h3>
+  <h3>Add a New Quote</h3>
+  <div>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button onclick="addQuote()">Add Quote</button>
+    <button id="addQuoteBtn">Add Quote</button>
   </div>
 
-  <div class="controls">
-    <h3>Import / Export Quotes</h3>
-    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-    <button onclick="exportToJsonFile()">Export Quotes</button>
-  </div>
+  <h3>Available Categories</h3>
+  <select id="categorySelect">
+    <option value="all">All</option>
+  </select>
 
-  <script>
-    // === Global Quotes Array ===
-    let quotes = JSON.parse(localStorage.getItem("quotes")) || [
-      { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
-      { text: "Life is what happens when you're busy making other plans.", category: "Life" },
-      { text: "Do not take life too seriously. You will never get out of it alive.", category: "Humour" },
-      { text: "In the middle of every difficulty lies opportunity.", category: "Motivation" },
-      { text: "Simplicity is the ultimate sophistication.", category: "Philosophy" }
-    ];
-
-    const quoteDisplay = document.getElementById("quoteDisplay");
-    const newQuoteButton = document.getElementById("newQuote");
-
-    // === Save Quotes to Local Storage ===
-    function saveQuotes() {
-      localStorage.setItem("quotes", JSON.stringify(quotes));
-    }
-
-    // === Show Random Quote ===
-    function showRandomQuote() {
-      if (quotes.length === 0) {
-        quoteDisplay.textContent = "No quotes available. Please add one!";
-        return;
-      }
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      const randomQuote = quotes[randomIndex];
-      quoteDisplay.textContent = `"${randomQuote.text}" — ${randomQuote.category}`;
-      sessionStorage.setItem("lastQuote", JSON.stringify(randomQuote));
-    }
-
-    // === Add a New Quote ===
-    function addQuote() {
-      const text = document.getElementById("newQuoteText").value.trim();
-      const category = document.getElementById("newQuoteCategory").value.trim();
-
-      if (!text || !category) {
-        alert("Please fill in both fields!");
-        return;
-      }
-
-      quotes.push({ text, category });
-      saveQuotes();
-      showRandomQuote();
-
-      document.getElementById("newQuoteText").value = "";
-      document.getElementById("newQuoteCategory").value = "";
-    }
-
-    // === Export Quotes as JSON File ===
-    function exportToJsonFile() {
-      const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "quotes.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // === Import Quotes from JSON File ===
-    function importFromJsonFile(event) {
-      const fileReader = new FileReader();
-      fileReader.onload = function (e) {
-        try {
-          const importedQuotes = JSON.parse(e.target.result);
-          if (Array.isArray(importedQuotes)) {
-            quotes.push(...importedQuotes);
-            saveQuotes();
-            alert("Quotes imported successfully!");
-          } else {
-            alert("Invalid file format.");
-          }
-        } catch (error) {
-          alert("Error reading file. Please upload a valid JSON.");
-        }
-      };
-      fileReader.readAsText(event.target.files[0]);
-    }
-
-    // === Event Listener for “Show New Quote” Button ===
-    newQuoteButton.addEventListener("click", showRandomQuote);
-
-    // === Load Last Viewed Quote from Session Storage ===
-    window.addEventListener("load", () => {
-      const lastQuote = sessionStorage.getItem("lastQuote");
-      if (lastQuote) {
-        const parsed = JSON.parse(lastQuote);
-        quoteDisplay.textContent = `"${parsed.text}" — ${parsed.category}`;
-      } else {
-        quoteDisplay.textContent = "Click “Show New Quote” to begin!";
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
-
-
 
 
 
