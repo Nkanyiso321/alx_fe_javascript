@@ -4,21 +4,118 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #quote-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #quote-form input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #quote-form button {
+      padding: 10px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #quote-form button:hover {
+      background-color: #0056b3;
+    }
+    #quote-container {
+      margin-top: 20px;
+    }
+    #notification {
+      display: none;
+      background: #e0f7fa;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      text-align: center;
+    }
+    #conflict-modal {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    #conflict-modal button {
+      margin: 5px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #conflict-modal button:first-child {
+      background-color: #28a745;
+      color: white;
+    }
+    #conflict-modal button:nth-child(2) {
+      background-color: #dc3545;
+      color: white;
+    }
+    #conflict-modal button:last-child {
+      background-color: #6c757d;
+      color: white;
+    }
+    #test-button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #test-button:hover {
+      background-color: #138496;
+    }
+  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  <select id="categoryFilter" onchange="filterQuotes()">
-    <option value="all">All Categories</option>
-  </select>
-  <div id="quoteDisplay"></div>
-  <button id="newQuote">Show New Quote</button>
-  <button id="syncButton" onclick="manualSync()">Sync with Server</button>
-  <div id="notification"></div>
-  <div id="conflictResolution" style="display: none;">
-    <p>Conflict detected! Server has newer data. Choose:</p>
-    <button onclick="resolveKeepLocal()">Keep Local</button>
-    <button onclick="resolveKeepServer()">Accept Server</button>
+  <form id="quote-form">
+    <input type="text" id="quote-text" placeholder="Enter quote" required>
+    <input type="text" id="quote-author" placeholder="Enter author" required>
+    <button type="submit">Add Quote</button>
+  </form>
+  <div id="notification">
+    <span id="notification-message"></span>
   </div>
-  <script src="script.js"></script>
-</body>
-</html>
+  <div id="quote-container"></div>
+  <button id="test-button" onclick="runTests()">Run Tests</button>
+  <div id="conflict-modal">
+    <h3>Conflict Detected</h3>
+    <p><strong>Local Quote:</strong> <span id="local-quote"></span></p>
+    <p><strong>Server Quote:</strong> <span id="server-quote"></span></p>
+    <button onclick="resolveConflict('local')">Keep Local</button>
+    <button onclick="resolveConflict('server')">Keep Server</button>
+    <button onclick="closeConflictModal()">Cancel</button>
+  </div>
+  <script src="script.js
