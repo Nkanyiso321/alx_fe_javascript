@@ -1,4 +1,4 @@
-// Step 1: Initialize quotes array
+// Step 1: Quotes array
 let quotes = [
   { text: "The only way to do great work is to love what you do.", category: "Motivation" },
   { text: "In the middle of difficulty lies opportunity.", category: "Inspiration" },
@@ -6,42 +6,54 @@ let quotes = [
   { text: "Life is what happens when you're busy making other plans.", category: "Life" },
 ];
 
-// Step 2: DOM elements
-const quoteDisplay = document.getElementById("quoteDisplay");
-const newQuoteBtn = document.getElementById("newQuote");
-const addQuoteBtn = document.getElementById("addQuoteBtn");
-const categorySelect = document.getElementById("categorySelect");
-
-// Step 3: Display a random quote
-function showRandomQuote() {
-  const selectedCategory = categorySelect.value;
-  let filteredQuotes = quotes;
-
-  if (selectedCategory !== "all") {
-    filteredQuotes = quotes.filter(q => q.category.toLowerCase() === selectedCategory.toLowerCase());
-  }
-
-  if (filteredQuotes.length === 0) {
-    quoteDisplay.innerHTML = `<p>No quotes found in this category.</p>`;
+// Step 2: Display random quote function
+function displayRandomQuote() {
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  if (quotes.length === 0) {
+    quoteDisplay.textContent = "No quotes available.";
     return;
   }
 
-  const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
-  const quote = filteredQuotes[randomIndex];
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[randomIndex];
 
-  // Clear and re-create elements dynamically
+  // Clear display
   quoteDisplay.innerHTML = "";
+
+  // Create elements dynamically
   const quoteText = document.createElement("p");
-  const quoteCategory = document.createElement("p");
-  
   quoteText.textContent = `"${quote.text}"`;
-  quoteText.style.fontSize = "1.2em";
-  
+
+  const quoteCategory = document.createElement("p");
   quoteCategory.textContent = `— ${quote.category}`;
   quoteCategory.classList.add("category");
 
+  // Append to DOM
   quoteDisplay.appendChild(quoteText);
   quoteDisplay.appendChild(quoteCategory);
+}
+
+// Step 3: Function to dynamically create add-quote form
+function createAddQuoteForm() {
+  const formContainer = document.createElement("div");
+
+  const inputQuote = document.createElement("input");
+  inputQuote.id = "newQuoteText";
+  inputQuote.placeholder = "Enter a new quote";
+
+  const inputCategory = document.createElement("input");
+  inputCategory.id = "newQuoteCategory";
+  inputCategory.placeholder = "Enter quote category";
+
+  const addButton = document.createElement("button");
+  addButton.textContent = "Add Quote";
+  addButton.addEventListener("click", addQuote);
+
+  formContainer.appendChild(inputQuote);
+  formContainer.appendChild(inputCategory);
+  formContainer.appendChild(addButton);
+
+  document.body.appendChild(formContainer);
 }
 
 // Step 4: Add a new quote
@@ -54,39 +66,13 @@ function addQuote() {
     return;
   }
 
-  // Add new quote to array
   quotes.push({ text, category });
-
-  // Dynamically update categories dropdown
-  if (![...categorySelect.options].some(opt => opt.value === category.toLowerCase())) {
-    const newOption = document.createElement("option");
-    newOption.value = category.toLowerCase();
-    newOption.textContent = category;
-    categorySelect.appendChild(newOption);
-  }
-
-  // Clear inputs
-  document.getElementById("newQuoteText").value = "";
-  document.getElementById("newQuoteCategory").value = "";
-
   alert("Quote added successfully!");
 }
 
-// Step 5: Event listeners
-newQuoteBtn.addEventListener("click", showRandomQuote);
-addQuoteBtn.addEventListener("click", addQuote);
+// Step 5: Add event listener for "Show New Quote" button
+document.getElementById("newQuote").addEventListener("click", displayRandomQuote);
 
-// Step 6: Initialize first quote and categories
-function populateCategories() {
-  const uniqueCategories = [...new Set(quotes.map(q => q.category))];
-  uniqueCategories.forEach(cat => {
-    const option = document.createElement("option");
-    option.value = cat.toLowerCase();
-    option.textContent = cat;
-    categorySelect.appendChild(option);
-  });
-}
-
-// Initialize on load
-populateCategories();
-showRandomQuote();
+// Step 6: Initialize
+displayRandomQuote();
+createAddQuoteForm();
