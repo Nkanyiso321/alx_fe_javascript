@@ -4,71 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dynamic Quote Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 40px;
-      background-color: #f7f7f7;
-    }
-    h1 {
-      color: #333;
-    }
-    #quoteDisplay {
-      margin: 20px auto;
-      padding: 15px;
-      border-radius: 10px;
-      background-color: #fff;
-      width: 60%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      min-height: 80px;
-    }
-    .category {
-      color: #666;
-      font-style: italic;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    input {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-  </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
-  
   <div id="quoteDisplay"></div>
-  
   <button id="newQuote">Show New Quote</button>
-
-  <h3>Add a New Quote</h3>
-  <div>
-    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-    <button id="addQuoteBtn">Add Quote</button>
-  </div>
-
-  <h3>Available Categories</h3>
-  <select id="categorySelect">
-    <option value="all">All</option>
-  </select>
-
   <script src="script.js"></script>
 </body>
 </html>
-
-
-
