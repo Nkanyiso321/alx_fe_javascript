@@ -12,6 +12,13 @@
   </select>
   <div id="quoteDisplay"></div>
   <button id="newQuote">Show New Quote</button>
+  <button id="syncButton" onclick="manualSync()">Sync with Server</button>
+  <div id="notification"></div>
+  <div id="conflictResolution" style="display: none;">
+    <p>Conflict detected! Server has newer data. Choose:</p>
+    <button onclick="resolveKeepLocal()">Keep Local</button>
+    <button onclick="resolveKeepServer()">Accept Server</button>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>

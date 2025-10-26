@@ -40,6 +40,122 @@ function loadSelectedCategory() {
   return localStorage.getItem('selectedCategory') || 'all';
 }
 
+// Function to show notification
+function showNotification(message, isError = false) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.color = isError ? 'red' : 'green';
+  setTimeout(() => { notification.textContent = ''; }, 5000);
+}
+
+// Function to show conflict resolution UI
+function showConflictResolution() {
+  document.getElementById('conflictResolution').style.display = 'block';
+}
+
+// Function to hide conflict resolution UI
+function hideConflictResolution() {
+  document.getElementById('conflictResolution').style.display = 'none';
+}
+
+// Function to resolve conflict by keeping local data
+function resolveKeepLocal() {
+  hideConflictResolution();
+  showNotification('Conflict resolved: Kept local data.');
+}
+
+// Function to resolve conflict by accepting server data
+function resolveKeepServer() {
+  syncData(true); // Force accept server
+  hideConflictResolution();
+  showNotification('Conflict resolved: Accepted server data.');
+}
+
+// Function to fetch quotes from server (JSONPlaceholder)
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    if (!response.ok) throw new Error('Server fetch failed');
+    const serverPosts = await response.json();
+    // Map posts to quotes: title -> category, body -> text
+    return serverPosts.map(post => ({ text: post.body, category: post.title }));
+  } catch (error) {
+    console.error('Error fetching from server:', error);
+    showNotification('Server fetch error. Using local data.', true);
+    return [];
+  }
+}
+
+// Function to push new local quotes to server (mock, non-persisting)
+async function pushLocalQuotes(newQuotes) {
+  try {
+    for (const quote of newQuotes) {
+      await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: quote.category, body: quote.text })
+      });
+    }
+    showNotification(`${newQuotes.length} new quotes pushed to server.`);
+  } catch (error) {
+    console.error('Error pushing to server:', error);
+    showNotification('Server push error.', true);
+  }
+}
+
+// Function to detect conflicts (simple: compare lengths)
+function detectConflict(localQuotes, serverQuotes) {
+  return serverQuotes.length > localQuotes.length;
+}
+
+// Function to sync data: Pull from server, resolve conflicts, push new locals
+async function syncData(forceAcceptServer = false) {
+  const serverQuotes = await fetchServerQuotes();
+  if (serverQuotes.length === 0) {
+    showNotification('No server data available.');
+    return;
+  }
+
+  const hasConflict = detectConflict(quotes, serverQuotes);
+  if (hasConflict && !forceAcceptServer) {
+    showNotification('Conflict detected! Check resolution options.');
+    showConflictResolution();
+    return;
+  }
+
+  // Server takes precedence: merge server into local (add missing, overwrite if conflict)
+  const mergedQuotes = [...serverQuotes];
+  quotes.forEach(localQuote => {
+    const exists = mergedQuotes.some(sq => sq.text === localQuote.text && sq.category === localQuote.category);
+    if (!exists) {
+      mergedQuotes.push(localQuote);
+    }
+  });
+  quotes = mergedQuotes;
+  saveQuotes();
+
+  // Push any new local quotes that weren't in server (in case of prior sync)
+  const newLocals = quotes.filter(lq => !serverQuotes.some(sq => sq.text === lq.text && sq.category === lq.category));
+  if (newLocals.length > 0) {
+    await pushLocalQuotes(newLocals);
+  }
+
+  // Update UI
+  populateCategories();
+  filterQuotes();
+  showNotification('Data synced successfully!');
+}
+
+// Manual sync trigger
+function manualSync() {
+  syncData();
+}
+
+// Periodic sync (every 30 seconds)
+setInterval(() => {
+  syncData();
+}, 30000);
+
 // Function to populate the category dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById('categoryFilter');
@@ -122,7 +238,7 @@ function createAddQuoteForm() {
 }
 
 // Function to add a new quote
-function addQuote() {
+async function addQuote() {
   const quoteText = document.getElementById('newQuoteText').value.trim();
   const quoteCategory = document.getElementById('newQuoteCategory').value.trim();
   
@@ -147,6 +263,9 @@ function addQuote() {
   
   // Refresh displayed quote based on current filter
   filterQuotes();
+  
+  // Trigger sync after add
+  await pushLocalQuotes([{ text: quoteText, category: quoteCategory }]);
 }
 
 // Function to export quotes to a JSON file
@@ -178,32 +297,14 @@ function importFromJsonFile(event) {
       saveQuotes();
       populateCategories(); // Update categories after import
       filterQuotes(); // Refresh display based on current filter
-      alert('Quotes imported successfully!');
-    } catch (e) {
-      alert('Error importing quotes. Please ensure the file is valid JSON.');
-    }
-  };
-  fileReader.readAsText(event.target.files[0]);
-}
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-  // Load quotes from local storage
-  loadQuotes();
-  
-  // Create the form and import/export controls dynamically
-  createAddQuoteForm();
-  
-  // Populate categories in the dropdown
-  populateCategories();
-  
+      // Trigger sync after import
   // Add event listener for the "Show New Quote" button
   document.getElementById('newQuote').addEventListener('click', filterQuotes);
   
   // Set the dropdown to the last selected category
   document.getElementById('categoryFilter').value = loadSelectedCategory();
   
-  // Display the last viewed quote (if available and matches filter) or a filtered quote
+  // Initial sync
   const lastQuote = loadLastQuote();
   const selectedCategory = loadSelectedCategory();
   if (lastQuote && (selectedCategory === 'all' || lastQuote.category === selectedCategory)) {
@@ -220,4 +321,24 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     filterQuotes();
   }
-});
+});  syncData();
+  
+  // Display the last viewed quote (if available and matches filter) or a filtered quote
+  // Populate categories in the dropdown
+  populateCategories();
+  
+      pushLocalQuotes(importedQuotes);
+  createAddQuoteForm();
+  
+  loadQuotes();
+  
+  // Create the form and import/export controls dynamically
+      alert('Quotes imported successfully!');
+    } catch (e) {
+  // Load quotes from local storage
+      alert('Error importing quotes. Please ensure the file is valid JSON.');
+    }
+document.addEventListener('DOMContentLoaded', () => {
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
